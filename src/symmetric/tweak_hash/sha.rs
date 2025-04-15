@@ -1,4 +1,5 @@
 use sha3::{Digest, Sha3_256};
+use serde::{Serialize, Deserialize};
 
 use crate::{TWEAK_SEPARATOR_FOR_CHAIN_HASH, TWEAK_SEPARATOR_FOR_TREE_HASH};
 
@@ -58,6 +59,7 @@ impl ShaTweak {
 /// given a parameter length and the hash output length.
 /// Both lengths must be given in Bytes.
 /// Both lengths must be less than 255 bits.
+#[derive(Serialize,Deserialize,Clone, Copy)]
 pub struct ShaTweakHash<const PARAMETER_LEN: usize, const HASH_LEN: usize>;
 
 impl<const PARAMETER_LEN: usize, const HASH_LEN: usize> TweakableHash

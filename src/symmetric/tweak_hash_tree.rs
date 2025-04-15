@@ -1,5 +1,6 @@
 use crate::symmetric::tweak_hash::TweakableHash;
 use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
 
 /// Hash-Tree based on a tweakable hash function
 /// We consider hash trees in which each leaf is first
@@ -62,10 +63,15 @@ pub fn hash_tree_root<TH: TweakableHash>(tree: &HashTree<TH>) -> TH::Domain {
 }
 
 /// Opening in a hash-tree: a co-path, without the leaf
+#[derive(Serialize, Deserialize, Clone)]
 pub struct HashTreeOpening<TH: TweakableHash> {
     /// The co-path needed to verify
     /// If the tree has depth h, i.e, 2^h leafs
     /// the co-path should have size D
+    #[serde(bound(
+    serialize = "Vec<TH::Domain>: Serialize",
+    deserialize = "Vec<TH::Domain>: Deserialize<'de>"
+))]
     co_path: Vec<TH::Domain>,
 }
 
