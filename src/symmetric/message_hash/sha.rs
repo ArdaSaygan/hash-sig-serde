@@ -4,7 +4,9 @@ use crate::{
 
 use super::MessageHash;
 
-use sha3::{Digest, Sha3_256};
+// use sha3::{Digest, Sha3_256};
+use tiny_keccak::{Hasher, Sha3};
+
 
 /// A message hash implemented using SHA3
 /// All lengths must be given in Bytes.
@@ -45,7 +47,8 @@ impl<
         randomness: &Self::Randomness,
         message: &[u8; MESSAGE_LENGTH],
     ) -> Vec<u8> {
-        let mut hasher = Sha3_256::new();
+        // let mut hasher = Sha3_256::new();
+        let mut hasher = Sha3::v256();
 
         // first add randomness
         hasher.update(randomness);
@@ -55,14 +58,15 @@ impl<
 
         // now add tweak (= domain separator + epoch)
         // domain separator: this is a message hash tweak.
-        hasher.update([TWEAK_SEPARATOR_FOR_MESSAGE_HASH]);
-        hasher.update(epoch.to_le_bytes());
+        hasher.update(&[TWEAK_SEPARATOR_FOR_MESSAGE_HASH]);
+        hasher.update(&epoch.to_le_bytes());
 
         // now add the actual message to be hashed
         hasher.update(message);
 
         // finalize the hash, and take as many bytes as we need
-        let hash = hasher.finalize();
+        let mut hash = [0u8; 32];
+        hasher.finalize(&mut hash);
         // turn the bytes in the hash into chunks
         bytes_to_chunks(&hash[0..NUM_CHUNKS * CHUNK_SIZE / 8], Self::CHUNK_SIZE)
     }

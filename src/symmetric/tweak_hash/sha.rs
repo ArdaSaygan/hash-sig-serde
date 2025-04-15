@@ -1,4 +1,5 @@
-use sha3::{Digest, Sha3_256};
+// use sha3::{Digest, Sha3_256};
+use tiny_keccak::{Hasher, Sha3};
 use serde::{Serialize, Deserialize};
 
 use crate::{TWEAK_SEPARATOR_FOR_CHAIN_HASH, TWEAK_SEPARATOR_FOR_TREE_HASH};
@@ -103,11 +104,12 @@ impl<const PARAMETER_LEN: usize, const HASH_LEN: usize> TweakableHash
         tweak: &Self::Tweak,
         message: &[Self::Domain],
     ) -> Self::Domain {
-        let mut hasher = Sha3_256::new();
+        // let mut hasher = Sha3_256::new();
+        let mut hasher = Sha3::v256();
 
         // add the parameter and tweak
         hasher.update(parameter);
-        hasher.update(tweak.to_bytes());
+        hasher.update(&tweak.to_bytes());
 
         // now add the actual message to be hashed
         for m in message {
@@ -115,7 +117,8 @@ impl<const PARAMETER_LEN: usize, const HASH_LEN: usize> TweakableHash
         }
 
         // finalize the hash, and take as many bytes as we need
-        let result = hasher.finalize();
+        let mut result = [0u8;32];
+        hasher.finalize(&mut result);
         result[0..HASH_LEN].try_into().unwrap()
     }
 

@@ -1,5 +1,6 @@
 use super::Pseudorandom;
-use sha3::{Digest, Sha3_256};
+// use sha3::{Digest, Sha3_256};
+use tiny_keccak::{Hasher, Sha3};
 
 const KEY_LENGTH: usize = 32; // 32 bytes
 const PRF_DOMAIN_SEP: [u8; 16] = [
@@ -21,22 +22,24 @@ impl<const OUTPUT_LENGTH: usize> Pseudorandom for ShaPRF<OUTPUT_LENGTH> {
     }
 
     fn apply(key: &Self::Key, epoch: u32, index: u64) -> Self::Output {
-        let mut hasher = Sha3_256::new();
+        // let mut hasher = Sha3_256::new();
+        let mut hasher = Sha3::v256();
 
         // Hash the domain separator
-        hasher.update(PRF_DOMAIN_SEP);
+        hasher.update(&PRF_DOMAIN_SEP);
 
         // Hash the key
         hasher.update(key);
 
         // Hash the epoch
-        hasher.update(epoch.to_be_bytes());
+        hasher.update(&epoch.to_be_bytes());
 
         // Hash the index
-        hasher.update(index.to_be_bytes());
+        hasher.update(&index.to_be_bytes());
 
         // Finalize and convert to output
-        let result = hasher.finalize();
+        let mut result = [0u8; 32];
+        hasher.finalize(&mut result);
         result[0..OUTPUT_LENGTH].try_into().unwrap()
     }
 
