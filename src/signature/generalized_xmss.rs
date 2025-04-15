@@ -54,8 +54,8 @@ pub struct GeneralizedXMSSSignature<IE: IncomparableEncoding, TH: TweakableHash>
 /// It contains a Merkle root and a parameter for the tweakable hash
 #[derive(Serialize, Deserialize, Clone, Copy)]
 pub struct GeneralizedXMSSPublicKey<TH: TweakableHash> {
-    root: TH::Domain,
-    parameter: TH::Parameter,
+    pub root: TH::Domain,
+    pub parameter: TH::Parameter,
 }
 
 impl<TH: TweakableHash> PartialEq for GeneralizedXMSSPublicKey<TH> {
